@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Catálogo Interactivo – MG Service Group SAS</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+:root{
+  --bg:#0b0f14;
+  --paper:#0f141b;
+  --primary:#1f6feb;
+  --secondary:#4ea1ff;
+  --ink:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:Poppins,system-ui,Segoe UI,Roboto,Arial,sans-serif; overflow:hidden;
+}
+.catalogo{position:relative; width:100vw; height:100vh; display:flex; align-items:center; justify-content:center;}
+.book{position:relative; width:95%; max-width:1100px; height:90%;}
+
+/* Páginas */
+.page{
+  position:absolute; inset:0; background:var(--paper);
+  border-radius:12px; overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.65);
+  display:flex; flex-direction:column;
+  transform:translateX(0) scale(1); opacity:1;
+  transition:transform .75s cubic-bezier(.22,.61,.36,1), opacity .75s ease;
+  z-index:10; cursor:pointer;
+}
+.page img.bg{width:100%; height:100%; object-fit:cover; flex:1; display:block;}
+
+/* PORTADA */
+.page.portada{background:#000; display:flex; align-items:center; justify-content:center;}
+.page.portada img.bg{width:100%; height:100%; object-fit:contain; background:#000;}
+.page.portada .header{display:none;}
+
+/* Barra superior */
+.header{
+  position:absolute; top:0; left:0; right:0; height:80px;
+  background:#000;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:0 24px; z-index:20; flex-wrap:wrap;
+}
+.header img{height:56px; width:auto; cursor:pointer;}
+.header .links{display:flex; gap:14px; align-items:center; font-size:16px; flex-wrap:wrap;}
+.header .links a{color:#fff; text-decoration:none; display:flex; align-items:center; gap:6px;}
+.header .links a i{font-size:20px;}
+.header .links a:hover{color:var(--secondary);}
+
+/* Overlay de descripción */
+.overlay{
+  position:absolute; left:28px; bottom:88px; max-width:520px;
+  background:rgba(0,0,0,.62); backdrop-filter:blur(6px);
+  padding:20px 22px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,.55);
+  transition: transform .28s ease, box-shadow .28s ease;
+  cursor:pointer;
+}
+.overlay:hover{transform:translateY(-2px) scale(1.03); box-shadow:0 14px 44px rgba(0,0,0,.75);}
+.overlay h2{margin:0 0 8px; font-size:26px; font-weight:900; color:var(--secondary); text-transform:uppercase;}
+.overlay p{margin:0; font-size:15px; line-height:1.55; font-weight:400}
+.overlay .click-hint{font-size:13px; opacity:.8; margin-top:6px; color:var(--secondary); font-style:italic;}
+
+/* Transición */
+.slide-out{transform:translateX(-30%) scale(.96); opacity:0; z-index:0!important;}
+
+/* Flechas de navegación */
+.nav-buttons{
+  position:absolute; left:50%; top:40%;
+  width:min(1160px,96vw); transform:translate(-50%,-50%);
+  display:flex; justify-content:space-between; pointer-events:none;
+  z-index:1000;
+}
+.nav-buttons button{
+  pointer-events:all; width:68px; height:68px; border-radius:50%;
+  border:none; color:#fff; font-size:24px; cursor:pointer;
+  background: radial-gradient(120% 120% at 30% 30%, var(--secondary), var(--primary));
+  box-shadow:0 10px 30px rgba(0,0,0,.6);
+  transition:transform .2s ease, filter .2s ease;
+}
+.nav-buttons button:hover{transform:scale(1.12); filter:brightness(1.08);}
+
+/* Hint */
+.hint{position:absolute; bottom:20px; left:20px; z-index:1000; opacity:.75;
+  font-size:13px; background:rgba(0,0,0,.5); padding:8px 12px; border-radius:10px;}
+
+/* Formulario último slide */
+.form-container{
+  margin:auto; max-width:520px; width:92%;
+  background:rgba(0,0,0,.7); padding:28px; border-radius:14px;
+  box-shadow:0 8px 30px rgba(0,0,0,.6);
+}
+.form-container h2{margin:0 0 14px; font-size:24px; text-align:center; color:var(--secondary);}
+.form-container p.helper{margin:0 0 16px; text-align:center; opacity:.9; font-size:14px;}
+.form-container input, .form-container textarea{
+  width:100%; margin-bottom:14px; padding:12px 14px;
+  border-radius:8px; border:none; font-family:inherit; font-size:15px;
+}
+.form-container textarea{resize:vertical}
+.form-actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center}
+.form-container button.primary{
+  flex:1 1 220px; padding:14px; border:none; border-radius:10px;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:#fff; font-weight:700; font-size:16px; cursor:pointer;
+}
+.form-container button.primary:hover{filter:brightness(1.1);}
+.form-container button.ghost{
+  flex:1 1 220px; padding:14px; border:1px solid rgba(255,255,255,.25);
+  border-radius:10px; background:transparent; color:#fff; font-weight:700; font-size:16px; cursor:pointer;
+}
+.form-container button.ghost:hover{background:rgba(255,255,255,.08);}
+
+/* Acceso rápido (último slide) */
+.quick-nav{
+  margin:14px auto 0; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
+}
+.quick-nav button{
+  padding:10px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06); color:#fff; cursor:pointer; font-weight:700; letter-spacing:.2px;
+}
+.quick-nav button:hover{background:rgba(255,255,255,.14)}
+
+/* ===== MODAL ===== */
+.modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.72); z-index:2000; padding:20px;}
+.modal.active{display:flex; animation:fadeIn .25s ease;}
+.modal-card{
+  width:min(860px,96vw); background:var(--paper); border-radius:16px; padding:22px;
+  box-shadow:0 16px 48px rgba(0,0,0,.65); color:#fff;
+  transform:scale(.86); opacity:0; animation:popIn .32s forwards;
+}
+.modal-card header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+.modal-card h3{margin:0; font-size:24px; color:var(--secondary); font-weight:900; text-transform:uppercase;}
+.modal-close{border:none; background:transparent; color:#fff; font-size:28px; cursor:pointer; line-height:1;}
+.modal-img{width:100%; border-radius:12px; margin-bottom:12px; object-fit:cover; max-height:52vh;}
+.modal-body{font-size:15px; line-height:1.6; opacity:.95}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0; transform:scale(.86)} to{opacity:1; transform:scale(1)}}
+
+/* ==== MOBILE FIXES ==== */
+@media (max-width: 768px){
+  .header{height:auto; padding:6px 12px;}
+  .header img{height:44px;}
+  .header .links{font-size:13px; gap:10px;}
+  .overlay h2{font-size:20px;}
+  .overlay p{font-size:13px;}
+  .form-container h2{font-size:20px;}
+  /* Botones más arriba en móvil */
+  .nav-buttons{top:30%; padding:0 10px;}
+  .nav-buttons button{width:48px; height:48px; font-size:18px;}
+}
+</style>
+</head>
+<body>
+
+<div class="catalogo">
+  <div class="book" id="book">
+    <!-- PORTADA -->
+    <section class="page portada" data-page="0" style="z-index:9;">
+      <img src="portadamg (2).png" class="bg" alt="Portada MG Service Group SAS">
+    </section>
+
+    <!-- CUBIERTAS -->
+    <section class="page" data-page="1" style="z-index:8;">
+      <div class="header">
+        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
+        <div class="links">
+          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
+          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
+        </div>
+      </div>
+      <img src="cubiertatejatechmet.png" class="bg" alt="Cubiertas tipo sándwich teja Techmet">
+      <div class="overlay" data-service="cubiertas">
+        <h2>Cubiertas tipo sándwich teja Techmet</h2>
+        <p>Instalación de cubiertas industriales con materiales de alta resistencia. Aseguramos durabilidad, estanqueidad y una estética moderna que protege tu inversión.</p>
+        <div class="click-hint">Haz clic para más información</div>
+      </div>
+    </section>
+
+    <!-- PANELES -->
+    <section class="page" data-page="2" style="z-index:7;">
+      <div class="header">
+        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
+        <div class="links">
+          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
+          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
+        </div>
+      </div>
+      <img src="Panelesdepoliuretano.png" class="bg" alt="Paneles PU">
+      <div class="overlay" data-service="paneles">
+        <h2>Paneles de poliuretano</h2>
+        <p>Instalamos paneles en poliuretano tipo sándwich, ideales para cámaras frigoríficas y cubiertas industriales. Garantizan aislamiento térmico, reducción de costos energéticos y un acabado impecable.</p>
+        <div class="click-hint">Haz clic para más información</div>
+      </div>
+    </section>
+
+    <!-- MANTENIMIENTO -->
+    <section class="page" data-page="3" style="z-index:6;">
+      <div class="header">
+        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
+        <div class="links">
+          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
+          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
+        </div>
+      </div>
+      <img src="mantenimientoindustrial.png" class="bg" alt="Mantenimiento">
+      <div class="overlay" data-service="mantenimiento">
+        <h2>Mantenimiento industrial</h2>
+        <p>Programas preventivos y correctivos para prolongar la vida útil de cubiertas y estructuras, con enfoque en seguridad y reducción de costos.</p>
+        <div class="click-hint">Haz clic para más información</div>
+      </div>
+    </section>
+
+    <!-- ESTRUCTURAS -->
+    <section class="page" data-page="4" style="z-index:5;">
+      <div class="header">
+        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
+        <div class="links">
+          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
+          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
+        </div>
+      </div>
+      <img src="estructurametalica.png" class="bg" alt="Estructuras Metálicas">
+      <div class="overlay" data-service="estructuras">
+        <h2>Estructuras metálicas</h2>
+        <p>Fabricamos estructuras metálicas a la medida de tu proyecto: livianas, pesadas o industriales. Usamos tecnología de precisión, materiales de alta calidad y un equipo especializado para garantizar seguridad y durabilidad.</p>
+        <div class="click-hint">Haz clic para más información</div>
+      </div>
+    </section>
+
+    <!-- CABINAS -->
+    <section class="page" data-page="5" style="z-index:4;">
+      <div class="header">
+        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
+        <div class="links">
+          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
+          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
+        </div>
+      </div>
+      <img src="cuartosfrios.png" class="bg" alt="Cabinas de Refrigeración">
+      <div class="overlay" data-service="cabinas">
+        <h2>Cabinas de refrigeración</h2>
+        <p>Instalación y montaje de cabinas de refrigeración como sistemas de enfriamiento para proyectos industriales, comerciales y residenciales.</p>
+        <div class="click-hint">Haz clic para más información</div>
+      </div>
+    </section>
+
+    <!-- SLIDE FINAL -->
+    <section class="page" data-page="6" style="z-index:3;">
+      <div class="header">
+        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
+        <div class="links">
+          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
+          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
+        </div>
+      </div>
+      <div class="form-container">
+        <h2>Hablemos de su proyecto</h2>
+        <p class="helper">Déjenos sus datos y un experto de MG Service Group SAS lo contactará para asesorarlo y enviar una cotización.</p>
+        <form id="leadForm">
+          <input id="fName" type="text" placeholder="Nombre completo" required>
+          <input id="fEmail" type="email" placeholder="Correo electrónico" required>
+          <textarea id="fMsg" rows="4" placeholder="Cuéntenos brevemente su necesidad" required></textarea>
+          <div class="form-actions">
+            <button type="submit" class="primary">Enviar datos</button>
+            <button type="button" class="ghost" onclick="goToStart()">⬅ Volver a la portada</button>
+          </div>
+        </form>
+        <div class="quick-nav">
+          <button data-goto="0">Portada</button>
+          <button data-goto="1">Cubiertas</button>
+          <button data-goto="2">Paneles PU</button>
+          <button data-goto="3">Mantenimiento</button>
+          <button data-goto="4">Estructuras</button>
+          <button data-goto="5">Cabinas</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="nav-buttons" id="nav">
+    <button id="prevBtn"><i class="fa-solid fa-arrow-left"></i></button>
+    <button id="nextBtn"><i class="fa-solid fa-arrow-right"></i></button>
+  </div>
+  <div class="hint">Usa ← / → o toca las flechas para navegar</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="serviceModal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <header>
+      <h3 id="modalTitle">Título</h3>
+      <button class="modal-close" id="modalClose" aria-label="Cerrar">✖</button>
+    </header>
+    <img class="modal-img" id="modalImg" src="" alt="">
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')];
+const nextBtn=document.getElementById('nextBtn');
+const prevBtn=document.getElementById('prevBtn');
+let current=0;
+
+function update(){
+  pages.forEach((pg,i)=>{
+    if(i<current){ pg.classList.add('slide-out'); }
+    else{ pg.classList.remove('slide-out'); }
+    pg.style.zIndex=(pages.length - i);
+  });
+  prevBtn && (prevBtn.style.visibility=current>0?'visible':'hidden');
+  nextBtn && (nextBtn.style.visibility=current<pages.length-1?'visible':'hidden');
+}
+function goToStart(){ current=0; update(); }
+
+nextBtn && nextBtn.addEventListener('click',()=>{ if(current<pages.length-1){ current++; update(); }});
+prevBtn && prevBtn.addEventListener('click',()=>{ if(current>0){ current--; update(); }});
+pages.forEach((pg,i)=>pg.querySelectorAll('.logo').forEach(logo=>logo.addEventListener('click',goToStart)));
+pages.forEach((pg,i)=>pg.addEventListener('click',()=>{ if(i===current && current<pages.length-1){ current++; update(); }}));
+window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') nextBtn?.click(); if(e.key==='ArrowLeft')  prevBtn?.click();});
+let sx=0,sy=0;
+window.addEventListener('touchstart',(e)=>{ sx=e.touches[0].clientX; sy=e.touches[0].clientY; },{passive:true});
+window.addEventListener('touchend',(e)=>{
+  const dx=(e.changedTouches[0].clientX - sx), dy=(e.changedTouches[0].clientY - sy);
+  if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40){ if(dx<0) nextBtn?.click(); else prevBtn?.click(); }
+},{passive:true});
+
+document.querySelectorAll('.quick-nav button').forEach(b=>{
+  b.addEventListener('click', (e)=> {
+    e.stopPropagation();
+    const idx = parseInt(b.dataset.goto,10);
+    current = Math.max(0, Math.min(idx, pages.length-1));
+    update();
+  });
+});
+
+/* FormSubmit */
+document.getElementById('leadForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const name = document.getElementById('fName').value.trim();
+  const email = document.getElementById('fEmail').value.trim();
+  const msg = document.getElementById('fMsg').value.trim();
+
+  fetch('https://formsubmit.co/ajax/mgservicegroupsas@gmail.com', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ Nombre: name, Correo: email, Mensaje: msg, Origen: 'Catálogo Interactivo (web)' })
+  })
+  .then(r => { if(!r.ok) throw new Error('Error de red'); return r.json(); })
+  .then(() => { alert('✅ Gracias por registrarse, pronto será contactado.'); this.reset(); })
+  .catch(() => { alert('❌ No se pudo enviar. Intente nuevamente en unos minutos.'); });
+});
+
+/* MODALES */
+const modal=document.getElementById('serviceModal');
+const modalImg=document.getElementById('modalImg');
+const modalBody=document.getElementById('modalBody');
+const modalTitle=document.getElementById('modalTitle');
+const modalClose=document.getElementById('modalClose');
+
+const modalData={
+  cubiertas:{title:'Cubiertas tipo sándwich teja Techmet',img:'tejapoliuretano.png',text:'Instalamos cubiertas tipo sándwich con teja Techmet, óptimas para naves y centros logísticos. Su núcleo aislante y perfil exterior aseguran estanqueidad, excelente desempeño térmico y un acabado moderno. Gestionamos logística, seguridad en altura y garantías del sistema.'},
+  paneles:{title:'Paneles de poliuretano',img:'paneles.png',text:'Paneles en poliuretano para cámaras frías, techos y fachadas. Alta eficiencia energética (baja transmitancia), montaje ágil y precisión en encuentros. Cumplimiento de normativas sanitarias y compatibilidad con puertas y accesorios frigoríficos.'},
+  mantenimiento:{title:'Mantenimiento industrial',img:'mantenimientos.png',text:'Programas preventivos y correctivos: inspección, limpieza, sellado de juntas, reposición de fijaciones y tratamiento anticorrosivo. Reducimos paradas, mitigamos riesgos y extendemos la vida útil de cubiertas y estructuras.'},
+  estructuras:{title:'Estructuras metálicas',img:'estructuras.png',text:'Diseño, fabricación y montaje de estructuras livianas y pesadas para bodegas y galpones. Cálculo estructural, soldadura certificada, control dimensional y montaje seguro. Entregas con planos As-Built y dosieres de calidad.'},
+  cabinas:{title:'Cabinas de refrigeración',img:'cabinas.png',text:'Suministro e instalación de cabinas de refrigeración con control estable de temperatura. Soluciones para industria alimentaria, farmacéutica y logística. Enfoque en ahorro energético, estanqueidad, iluminación y accesos seguros, requisitos de seguridad, ambientales y de operación.'}
+};
+
+document.querySelectorAll('.overlay[data-service]').forEach(ov=>{
+  ov.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    const key=ov.dataset.service;
+    if(!modalData[key])return;
+    const d=modalData[key];
+    modalTitle.textContent=d.title;
+    modalImg.src=d.img;
+    modalImg.alt=d.title;
+    modalBody.textContent=d.text;
+    modal.classList.add('active');
+  });
+});
+
+function closeModal(){ modal.classList.remove('active'); }
+modalClose.addEventListener('click',closeModal);
+modal.addEventListener('click',(e)=>{ if(e.target===modal) closeModal(); });
+window.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeModal(); });
+
+update();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
