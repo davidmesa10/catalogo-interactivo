@@ -37,6 +37,14 @@ body{
 }
 .page img.bg{width:100%; height:100%; object-fit:cover; flex:1; display:block;}
 
+/* 🔧 Ajuste solo para cubiertateja en pantallas grandes */
+@media (min-width: 1024px) {
+  .page img[src="cubiertateja.png"] {
+    object-fit: cover;
+    object-position: center center; /* prioriza parte superior */
+  }
+}
+
 /* PORTADA */
 .page.portada{background:#000; display:flex; align-items:center; justify-content:center;}
 .page.portada img.bg{width:100%; height:100%; object-fit:contain; background:#000;}
@@ -180,7 +188,7 @@ body{
           <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
         </div>
       </div>
-      <img src="cubiertatejatechmet.png" class="bg" alt="Cubiertas tipo sándwich teja Techmet">
+      <img src="cubiertateja7.png" class="bg" alt="Cubiertas tipo sándwich teja Techmet">
       <div class="overlay" data-service="cubiertas">
         <h2>Cubiertas tipo sándwich teja Techmet</h2>
         <p>Instalación de cubiertas industriales con materiales de alta resistencia. Garantizamos durabilidad, estanqueidad y una estética moderna que protege tu inversión.</p>
@@ -416,6 +424,8 @@ update();
 </script>
 </body>
 </html>
+
+
 
 
 
