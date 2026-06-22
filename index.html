@@ -107,16 +107,71 @@
     #nav-prev { left:16px; }
     #nav-next { right:16px; }
 
-    /* ─── DOT INDICATOR ─── */
-    #dots {
+    /* ─── DOT INDICATOR + COUNTER ─── */
+    #nav-bottom {
       position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-      display:flex; gap:8px; align-items:center; z-index:80;
+      display:flex; align-items:center; gap:16px; z-index:80;
+    }
+    #dots {
+      display:flex; gap:8px; align-items:center;
     }
     .dot {
-      width:5px; height:5px; border-radius:50%; background:var(--subtle);
-      cursor:pointer; transition:all 0.3s;
+      width:6px; height:6px; border-radius:50%; background:var(--subtle);
+      cursor:pointer; transition:all 0.3s; border:none; padding:0;
     }
-    .dot.active { width:22px; border-radius:3px; background:var(--gold); }
+    .dot.active { width:24px; border-radius:3px; background:var(--gold); }
+    #slide-counter {
+      color:var(--muted); font-size:10px; letter-spacing:2px; font-weight:600;
+      white-space:nowrap;
+    }
+    #counter-cur { color:var(--gold); }
+
+    /* ─── MOBILE MENU BUTTON ─── */
+    #mobile-menu-btn {
+      display:none; position:fixed; bottom:20px; right:16px; z-index:90;
+      width:42px; height:42px; border-radius:50%;
+      background:var(--gold); color:#000; border:none;
+      font-size:18px; cursor:pointer; align-items:center; justify-content:center;
+      box-shadow:0 4px 16px rgba(201,168,76,0.4);
+    }
+
+    /* ─── MOBILE DRAWER ─── */
+    #mobile-drawer { display:none; }
+    #mobile-drawer.open { display:block; }
+    #mobile-drawer-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.6);
+      backdrop-filter:blur(4px); z-index:100;
+    }
+    #mobile-drawer-panel {
+      position:fixed; bottom:0; left:0; right:0; z-index:101;
+      background:var(--surface); border-top:1px solid rgba(201,168,76,0.2);
+      border-radius:16px 16px 0 0; padding-bottom:env(safe-area-inset-bottom,16px);
+    }
+    #mobile-drawer-header {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 20px 12px; border-bottom:1px solid var(--border);
+      color:var(--muted); font-size:11px; letter-spacing:3px; text-transform:uppercase;
+    }
+    #mobile-drawer-header button {
+      background:none; border:none; color:var(--muted); font-size:18px;
+      cursor:pointer; padding:4px 8px;
+    }
+    #mobile-drawer-list {
+      list-style:none; margin:0; padding:8px 0 8px;
+    }
+    #mobile-drawer-list li {
+      display:flex; align-items:center; gap:14px;
+      padding:14px 20px; cursor:pointer; transition:background 0.15s;
+    }
+    #mobile-drawer-list li:active { background:var(--border); }
+    #mobile-drawer-list li.mdl-active .mdl-name { color:var(--gold); }
+    .mdl-num { color:var(--gold); font-size:10px; font-weight:700; letter-spacing:2px; width:20px; }
+    .mdl-name { color:var(--text); font-size:15px; font-weight:400; }
+
+    @media (max-width: 768px) {
+      #mobile-menu-btn { display:flex; }
+      #nav-bottom { bottom:70px; }
+    }
 
     /* ─── SLIDE: PORTADA ─── */
     .slide-portada {
@@ -285,10 +340,10 @@
       flex-direction:column; justify-content:center; align-items:center;
       text-align:center; padding:80px 40px 60px;
       background:linear-gradient(135deg, var(--dark) 0%, var(--dark3) 50%, var(--dark) 100%);
-      position:relative; overflow:hidden;
+      overflow:hidden;
     }
     .contacto-bg {
-      position:absolute; inset:0; pointer-events:none; z-index:-1;
+      position:absolute; inset:0; pointer-events:none;
       background:
         radial-gradient(ellipse 60% 40% at 50% 60%, rgba(201,168,76,0.06) 0%, transparent 70%);
     }
@@ -395,8 +450,34 @@
 <button id="nav-prev" class="nav-arrow" onclick="prev()" aria-label="Anterior">‹</button>
 <button id="nav-next" class="nav-arrow" onclick="next()" aria-label="Siguiente">›</button>
 
-<!-- DOT INDICATOR -->
-<div id="dots" role="tablist" aria-label="Diapositivas"></div>
+<!-- DOT INDICATOR + COUNTER -->
+<div id="nav-bottom">
+  <div id="dots" role="tablist" aria-label="Diapositivas"></div>
+  <div id="slide-counter"><span id="counter-cur">01</span><span id="counter-sep"> / </span><span id="counter-tot">07</span></div>
+</div>
+
+<!-- MOBILE MENU BUTTON -->
+<button id="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menú de secciones">☰</button>
+
+<!-- MOBILE DRAWER -->
+<div id="mobile-drawer" aria-hidden="true">
+  <div id="mobile-drawer-overlay" onclick="closeMobileMenu()"></div>
+  <nav id="mobile-drawer-panel">
+    <div id="mobile-drawer-header">
+      <span>Secciones</span>
+      <button onclick="closeMobileMenu()" aria-label="Cerrar">✕</button>
+    </div>
+    <ul id="mobile-drawer-list">
+      <li onclick="goTo(0);closeMobileMenu()"><span class="mdl-num">01</span><span class="mdl-name">Inicio</span></li>
+      <li onclick="goTo(1);closeMobileMenu()"><span class="mdl-num">02</span><span class="mdl-name">Estructuras Metálicas</span></li>
+      <li onclick="goTo(2);closeMobileMenu()"><span class="mdl-num">03</span><span class="mdl-name">Panel Poliuretano</span></li>
+      <li onclick="goTo(3);closeMobileMenu()"><span class="mdl-num">04</span><span class="mdl-name">Cubiertas Metálicas</span></li>
+      <li onclick="goTo(4);closeMobileMenu()"><span class="mdl-num">05</span><span class="mdl-name">Mantenimiento 24/7</span></li>
+      <li onclick="goTo(5);closeMobileMenu()"><span class="mdl-num">06</span><span class="mdl-name">Cabinas de Refrigeración</span></li>
+      <li onclick="goTo(6);closeMobileMenu()"><span class="mdl-num">07</span><span class="mdl-name">Contacto</span></li>
+    </ul>
+  </nav>
+</div>
 
 <!-- ══════════════════════════════════════
      CATALOG SLIDES
@@ -833,6 +914,8 @@
     return document.getElementById('slide-' + n);
   }
 
+  const SLIDE_NAMES = ['Inicio','Estructuras','Panel PUR','Cubiertas','Mantenimiento','Refrigeración','Contacto'];
+
   function updateUI(n) {
     // Progress bar
     document.getElementById('progress-bar').style.width = ((n + 1) / TOTAL * 100) + '%';
@@ -846,6 +929,18 @@
     document.querySelectorAll('.nav-pill').forEach((p, i) => {
       p.classList.toggle('active', i === n);
     });
+
+    // Slide counter
+    document.getElementById('counter-cur').textContent = String(n + 1).padStart(2, '0');
+
+    // Mobile drawer active item
+    document.querySelectorAll('#mobile-drawer-list li').forEach((li, i) => {
+      li.classList.toggle('mdl-active', i === n);
+    });
+
+    // Hide/show arrows at boundaries
+    document.getElementById('nav-prev').style.opacity = n === 0 ? '0.25' : '1';
+    document.getElementById('nav-next').style.opacity = n === TOTAL - 1 ? '0.25' : '1';
   }
 
   window.goTo = function (n) {
@@ -914,6 +1009,30 @@
       dx < 0 ? next() : prev();
     }
   }, { passive: true });
+
+  // Mouse wheel navigation
+  let wheelCooldown = false;
+  document.addEventListener('wheel', e => {
+    if (wheelCooldown) return;
+    wheelCooldown = true;
+    e.deltaY > 0 ? next() : prev();
+    setTimeout(() => { wheelCooldown = false; }, 700);
+  }, { passive: true });
+
+  // Mobile drawer
+  window.toggleMobileMenu = function () {
+    const d = document.getElementById('mobile-drawer');
+    d.classList.toggle('open');
+    d.setAttribute('aria-hidden', d.classList.contains('open') ? 'false' : 'true');
+  };
+  window.closeMobileMenu = function () {
+    const d = document.getElementById('mobile-drawer');
+    d.classList.remove('open');
+    d.setAttribute('aria-hidden', 'true');
+  };
+
+  // Set total counter
+  document.getElementById('counter-tot').textContent = String(TOTAL).padStart(2, '0');
 
   // Initial UI
   updateUI(0);
