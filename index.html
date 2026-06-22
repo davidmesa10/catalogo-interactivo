@@ -1,444 +1,924 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Catálogo Interactivo – MG Service Group SAS</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Catálogo · MG Service Group SAS · Estructuras metálicas y panel poliuretano · Bogotá</title>
+  <meta name="description" content="Catálogo de servicios MG Service Group SAS — Estructuras metálicas, panel poliuretano Metecno, cubiertas, mantenimiento industrial y cabinas de refrigeración en Bogotá, Colombia.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ─── RESET & BASE ─── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --gold:    #C9A84C;
+      --gold-lt: #E8C96A;
+      --gold-dim:#C9A84C33;
+      --dark:    #0D0D0D;
+      --dark2:   #141414;
+      --dark3:   #1A1A1A;
+      --surface: #111111;
+      --border:  #1E1E1E;
+      --text:    #FFFFFF;
+      --muted:   #888888;
+      --subtle:  #444444;
+      --slide-h: 100vh;
+    }
+    html, body { height:100%; overflow:hidden; background:var(--dark); color:var(--text); }
+    body { font-family:'Inter', sans-serif; -webkit-font-smoothing:antialiased; }
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;900&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    /* ─── CATALOG SHELL ─── */
+    #catalog {
+      position:relative; width:100%; height:100vh; overflow:hidden;
+    }
 
-<style>
-:root{
-  --bg:#0b0f14;
-  --paper:#0f141b;
-  --primary:#1f6feb;
-  --secondary:#4ea1ff;
-  --ink:#ffffff;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; background:var(--bg); color:var(--ink);
-  font-family:Poppins,system-ui,Segoe UI,Roboto,Arial,sans-serif; overflow:hidden;
-}
-.catalogo{position:relative; width:100vw; height:100vh; display:flex; align-items:center; justify-content:center;}
-.book{position:relative; width:95%; max-width:1100px; height:90%;}
+    /* ─── SLIDES ─── */
+    .slide {
+      position:absolute; inset:0; width:100%; height:100%;
+      display:flex; opacity:0; pointer-events:none;
+      transition: opacity 0.6s cubic-bezier(.4,0,.2,1), transform 0.6s cubic-bezier(.4,0,.2,1);
+      transform: translateX(40px);
+      will-change: opacity, transform;
+    }
+    .slide.active {
+      opacity:1; pointer-events:all; transform:translateX(0);
+    }
+    .slide.exit-left  { opacity:0; transform:translateX(-40px); }
+    .slide.exit-right { opacity:0; transform:translateX(40px); }
 
-/* Páginas */
-.page{
-  position:absolute; inset:0; background:var(--paper);
-  border-radius:12px; overflow:hidden;
-  box-shadow:0 20px 60px rgba(0,0,0,.65);
-  display:flex; flex-direction:column;
-  transform:translateX(0) scale(1); opacity:1;
-  transition:transform .75s cubic-bezier(.22,.61,.36,1), opacity .75s ease;
-  z-index:10; cursor:pointer;
-}
-.page img.bg{width:100%; height:100%; object-fit:cover; flex:1; display:block;}
+    /* ─── PROGRESS BAR ─── */
+    #progress-bar {
+      position:fixed; top:0; left:0; height:2px; z-index:100;
+      background:linear-gradient(90deg, var(--gold), var(--gold-lt));
+      transition:width 0.5s cubic-bezier(.4,0,.2,1);
+      border-radius:0 2px 2px 0;
+    }
 
-/* 🔧 Ajuste solo para cubiertateja en pantallas grandes */
-@media (min-width: 1024px) {
-  .page img[src="cubiertateja.png"] {
-    object-fit: cover;
-    object-position: center center; /* prioriza parte superior */
-  }
-}
+    /* ─── TOP BAR ─── */
+    #topbar {
+      position:fixed; top:0; left:0; right:0; z-index:90;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 40px 14px 32px;
+      background:linear-gradient(to bottom, rgba(13,13,13,0.95) 0%, transparent 100%);
+      backdrop-filter:blur(0);
+    }
+    .topbar-logo {
+      display:flex; align-items:center; gap:10px;
+    }
+    .logo-mark {
+      width:32px; height:32px; background:var(--gold); border-radius:5px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:13px; font-weight:800; color:#000; letter-spacing:-0.5px; flex-shrink:0;
+    }
+    .logo-text { line-height:1.2; }
+    .logo-name { color:var(--text); font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+    .logo-sub  { color:var(--subtle); font-size:9px; letter-spacing:3px; text-transform:uppercase; }
 
-/* PORTADA */
-.page.portada{background:#000; display:flex; align-items:center; justify-content:center;}
-.page.portada img.bg{width:100%; height:100%; object-fit:contain; background:#000;}
-.page.portada .header{display:none;}
+    .topbar-nav { display:flex; gap:4px; align-items:center; }
+    .nav-pill {
+      padding:5px 12px; border-radius:20px; font-size:10px; font-weight:500;
+      letter-spacing:1.5px; text-transform:uppercase; cursor:pointer;
+      border:1px solid transparent; transition:all 0.2s; color:var(--subtle);
+      background:transparent; white-space:nowrap;
+    }
+    .nav-pill:hover  { color:var(--gold); border-color:var(--gold-dim); }
+    .nav-pill.active { color:var(--gold); background:var(--gold-dim); border-color:var(--gold-dim); }
 
-/* Barra superior */
-.header{
-  position:absolute; top:0; left:0; right:0; height:80px;
-  background:#000;
-  display:flex; justify-content:space-between; align-items:center;
-  padding:0 24px; z-index:20; flex-wrap:wrap;
-}
-.header img{height:56px; width:auto; cursor:pointer;}
-.header .links{display:flex; gap:14px; align-items:center; font-size:16px; flex-wrap:wrap;}
-.header .links a{color:#fff; text-decoration:none; display:flex; align-items:center; gap:6px;}
-.header .links a i{font-size:20px;}
-.header .links a:hover{color:var(--secondary);}
+    .topbar-cta {
+      background:var(--gold); color:#000; font-size:10px; font-weight:700;
+      letter-spacing:2px; text-transform:uppercase; padding:8px 18px;
+      border-radius:6px; cursor:pointer; transition:all 0.2s;
+      border:none; text-decoration:none; display:inline-block;
+    }
+    .topbar-cta:hover { background:var(--gold-lt); transform:translateY(-1px); }
 
-/* Overlay de descripción */
-.overlay{
-  position:absolute; left:28px; bottom:88px; max-width:520px;
-  background:rgba(0,0,0,.62); backdrop-filter:blur(6px);
-  padding:20px 22px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,.55);
-  transition: transform .28s ease, box-shadow .28s ease;
-  cursor:pointer;
-}
-.overlay:hover{transform:translateY(-2px) scale(1.03); box-shadow:0 14px 44px rgba(0,0,0,.75);}
-.overlay h2{margin:0 0 8px; font-size:26px; font-weight:900; color:var(--secondary); text-transform:uppercase;}
-.overlay p{margin:0; font-size:15px; line-height:1.55; font-weight:400}
-.overlay .click-hint{font-size:13px; opacity:.8; margin-top:6px; color:var(--secondary); font-style:italic;}
+    /* ─── NAV ARROWS ─── */
+    .nav-arrow {
+      position:fixed; top:50%; transform:translateY(-50%); z-index:80;
+      width:44px; height:44px; border-radius:50%;
+      background:rgba(13,13,13,0.7); border:1px solid rgba(201,168,76,0.3);
+      color:var(--gold); font-size:20px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      transition:all 0.2s; backdrop-filter:blur(8px);
+      user-select:none; -webkit-tap-highlight-color:transparent;
+    }
+    .nav-arrow:hover { background:var(--gold); color:#000; border-color:var(--gold); }
+    #nav-prev { left:16px; }
+    #nav-next { right:16px; }
 
-/* Transición */
-.slide-out{transform:translateX(-30%) scale(.96); opacity:0; z-index:0!important;}
+    /* ─── DOT INDICATOR ─── */
+    #dots {
+      position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+      display:flex; gap:8px; align-items:center; z-index:80;
+    }
+    .dot {
+      width:5px; height:5px; border-radius:50%; background:var(--subtle);
+      cursor:pointer; transition:all 0.3s;
+    }
+    .dot.active { width:22px; border-radius:3px; background:var(--gold); }
 
-/* Flechas de navegación */
-.nav-buttons{
-  position:absolute; left:50%; top:40%;
-  width:min(1160px,96vw); transform:translate(-50%,-50%);
-  display:flex; justify-content:space-between; pointer-events:none;
-  z-index:1000;
-}
-.nav-buttons button{
-  pointer-events:all; width:68px; height:68px; border-radius:50%;
-  border:none; color:#fff; font-size:24px; cursor:pointer;
-  background: radial-gradient(120% 120% at 30% 30%, var(--secondary), var(--primary));
-  box-shadow:0 10px 30px rgba(0,0,0,.6);
-  transition:transform .2s ease, filter .2s ease;
-}
-.nav-buttons button:hover{transform:scale(1.12); filter:brightness(1.08);}
+    /* ─── SLIDE: PORTADA ─── */
+    .slide-portada {
+      flex-direction:column; justify-content:space-between;
+      background:var(--dark);
+      padding:100px 80px 60px;
+      position:relative; overflow:hidden;
+    }
+    .portada-bg-accent {
+      position:absolute; top:0; right:0; width:42%; height:100%;
+      background:linear-gradient(135deg, rgba(201,168,76,0.04) 0%, rgba(201,168,76,0.01) 100%);
+      border-left:1px solid rgba(201,168,76,0.08);
+      pointer-events:none;
+    }
+    .portada-bg-grid {
+      position:absolute; inset:0; opacity:0.015;
+      background-image:
+        linear-gradient(rgba(201,168,76,1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,1) 1px, transparent 1px);
+      background-size:60px 60px;
+      pointer-events:none;
+    }
+    .portada-top { position:relative; }
+    .portada-eyebrow {
+      display:flex; align-items:center; gap:12px; margin-bottom:32px;
+    }
+    .eyebrow-line { width:40px; height:1px; background:var(--gold); }
+    .eyebrow-text { color:var(--gold); font-size:10px; font-weight:600; letter-spacing:4px; text-transform:uppercase; }
 
-/* Hint */
-.hint{position:absolute; bottom:20px; left:20px; z-index:1000; opacity:.75;
-  font-size:13px; background:rgba(0,0,0,.5); padding:8px 12px; border-radius:10px;}
+    .portada-title {
+      font-family:'Playfair Display', serif;
+      font-size:clamp(48px,6vw,76px);
+      font-weight:800; line-height:1.0; letter-spacing:-1.5px;
+      color:var(--text); position:relative;
+    }
+    .portada-title em { color:var(--gold); font-style:italic; }
 
-/* Formulario último slide */
-.form-container{
-  margin:auto; max-width:520px; width:92%;
-  background:rgba(0,0,0,.7); padding:28px; border-radius:14px;
-  box-shadow:0 8px 30px rgba(0,0,0,.6);
-}
-.form-container h2{margin:0 0 14px; font-size:24px; text-align:center; color:var(--secondary);}
-.form-container p.helper{margin:0 0 16px; text-align:center; opacity:.9; font-size:14px;}
-.form-container input, .form-container textarea{
-  width:100%; margin-bottom:14px; padding:12px 14px;
-  border-radius:8px; border:none; font-family:inherit; font-size:15px;
-}
-.form-container textarea{resize:vertical}
-.form-actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center}
-.form-container button.primary{
-  flex:1 1 220px; padding:14px; border:none; border-radius:10px;
-  background:linear-gradient(135deg,var(--primary),var(--secondary));
-  color:#fff; font-weight:700; font-size:16px; cursor:pointer;
-}
-.form-container button.primary:hover{filter:brightness(1.1);}
-.form-container button.ghost{
-  flex:1 1 220px; padding:14px; border:1px solid rgba(255,255,255,.25);
-  border-radius:10px; background:transparent; color:#fff; font-weight:700; font-size:16px; cursor:pointer;
-}
-.form-container button.ghost:hover{background:rgba(255,255,255,.08);}
+    .portada-desc {
+      color:var(--muted); font-size:15px; line-height:1.7;
+      margin-top:20px; max-width:460px; font-weight:300;
+    }
 
-/* Acceso rápido (último slide) */
-.quick-nav{
-  margin:14px auto 0; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
-}
-.quick-nav button{
-  padding:10px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.06); color:#fff; cursor:pointer; font-weight:700; letter-spacing:.2px;
-}
-.quick-nav button:hover{background:rgba(255,255,255,.14)}
+    .stats-row { display:flex; gap:48px; margin-top:40px; }
+    .stat-item { }
+    .stat-num { font-size:38px; font-weight:800; color:var(--gold); letter-spacing:-1px; line-height:1; }
+    .stat-lbl { font-size:9px; font-weight:600; color:var(--subtle); letter-spacing:3px; text-transform:uppercase; margin-top:4px; }
 
-/* ===== MODAL ===== */
-.modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.72); z-index:2000; padding:20px;}
-.modal.active{display:flex; animation:fadeIn .25s ease;}
-.modal-card{
-  width:min(860px,96vw); background:var(--paper); border-radius:16px; padding:22px;
-  box-shadow:0 16px 48px rgba(0,0,0,.65); color:#fff;
-  transform:scale(.86); opacity:0; animation:popIn .32s forwards;
-}
-.modal-card header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
-.modal-card h3{margin:0; font-size:24px; color:var(--secondary); font-weight:900; text-transform:uppercase;}
-.modal-close{border:none; background:transparent; color:#fff; font-size:28px; cursor:pointer; line-height:1;}
-.modal-img{width:100%; border-radius:12px; margin-bottom:12px; object-fit:cover; max-height:52vh;}
-.modal-body{font-size:15px; line-height:1.6; opacity:.95}
+    .portada-bottom { display:flex; justify-content:space-between; align-items:flex-end; position:relative; }
+    .portada-actions { display:flex; gap:12px; align-items:center; }
+    .btn-primary {
+      background:var(--gold); color:#000; font-size:11px; font-weight:700;
+      letter-spacing:2px; text-transform:uppercase; padding:13px 28px;
+      border-radius:7px; cursor:pointer; transition:all 0.2s; border:none;
+      text-decoration:none; display:inline-block;
+    }
+    .btn-primary:hover { background:var(--gold-lt); transform:translateY(-2px); box-shadow:0 8px 24px rgba(201,168,76,0.3); }
+    .btn-ghost {
+      border:1px solid rgba(201,168,76,0.4); color:var(--gold); font-size:11px;
+      font-weight:600; letter-spacing:2px; text-transform:uppercase;
+      padding:12px 24px; border-radius:7px; cursor:pointer;
+      transition:all 0.2s; background:transparent; text-decoration:none; display:inline-block;
+    }
+    .btn-ghost:hover { background:rgba(201,168,76,0.08); border-color:var(--gold); }
 
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes popIn{from{opacity:0; transform:scale(.86)} to{opacity:1; transform:scale(1)}}
+    .portada-badge {
+      text-align:right; line-height:1.5;
+    }
+    .badge-brand { color:var(--gold); font-size:22px; font-weight:800; letter-spacing:1px; display:block; }
+    .badge-sub   { color:var(--subtle); font-size:9px; letter-spacing:3px; text-transform:uppercase; }
 
-/* ==== MOBILE FIXES ==== */
-@media (max-width: 768px){
-  .header{height:auto; padding:6px 12px;}
-  .header img{height:44px;}
-  .header .links{font-size:13px; gap:10px;}
-  .overlay h2{font-size:20px;}
-  .overlay p{font-size:13px;}
-  .form-container h2{font-size:20px;}
-  /* Botones más arriba en móvil */
-  .nav-buttons{top:30%; padding:0 10px;}
-  .nav-buttons button{width:48px; height:48px; font-size:18px;}
-}
-</style>
+    /* ─── SLIDE: SERVICE ─── */
+    .slide-service { flex-direction:row; }
+
+    .service-content {
+      flex:1; display:flex; flex-direction:column; justify-content:space-between;
+      padding:100px 56px 56px;
+      background:linear-gradient(160deg, var(--dark) 0%, var(--dark2) 100%);
+      position:relative; overflow:hidden;
+    }
+    .service-content::before {
+      content:''; position:absolute; bottom:-60px; left:-60px;
+      width:200px; height:200px; border-radius:50%;
+      background:radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 70%);
+      pointer-events:none;
+    }
+
+    .service-photo {
+      width:46%; position:relative; overflow:hidden; flex-shrink:0;
+    }
+    .service-photo img {
+      width:100%; height:100%; object-fit:cover;
+      filter:brightness(0.78) saturate(0.85) contrast(1.05);
+      transition:transform 0.8s cubic-bezier(.4,0,.2,1);
+      display:block;
+    }
+    .service-photo:hover img { transform:scale(1.04); }
+    .service-photo-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(to top, rgba(13,13,13,0.6) 0%, transparent 50%);
+      pointer-events:none;
+    }
+    .service-photo-badge {
+      position:absolute; bottom:24px; left:24px;
+      background:rgba(13,13,13,0.8); border:1px solid rgba(201,168,76,0.3);
+      color:var(--gold); font-size:9px; letter-spacing:2px; text-transform:uppercase;
+      padding:6px 14px; border-radius:20px; backdrop-filter:blur(8px);
+    }
+    .service-photo-num {
+      position:absolute; top:24px; right:24px;
+      color:rgba(201,168,76,0.4); font-size:11px; letter-spacing:3px;
+      font-weight:700; text-transform:uppercase;
+    }
+
+    /* reversed layout (photo left) */
+    .slide-service.reverse .service-content { order:2; }
+    .slide-service.reverse .service-photo   { order:1; }
+
+    .service-top { }
+    .service-num-label {
+      color:var(--gold); font-size:9px; font-weight:700; letter-spacing:5px;
+      text-transform:uppercase; margin-bottom:12px;
+      display:flex; align-items:center; gap:12px;
+    }
+    .service-num-label::before { content:''; display:block; width:28px; height:1px; background:var(--gold); }
+
+    .service-title {
+      font-family:'Playfair Display', serif;
+      font-size:clamp(34px,4vw,52px);
+      font-weight:800; line-height:1.0; letter-spacing:-1px; color:var(--text);
+    }
+    .service-title em { color:var(--gold); font-style:italic; }
+    .service-desc {
+      color:var(--muted); font-size:13.5px; line-height:1.75;
+      margin-top:14px; max-width:420px; font-weight:300;
+    }
+
+    .spec-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:20px;
+    }
+    .spec-item {
+      background:var(--surface); border:1px solid var(--border); border-radius:7px;
+      padding:10px 14px; transition:border-color 0.2s;
+    }
+    .spec-item:hover { border-color:rgba(201,168,76,0.25); }
+    .spec-val { font-size:15px; font-weight:700; color:var(--gold); line-height:1.2; }
+    .spec-key { font-size:9px; color:var(--subtle); letter-spacing:1.5px; text-transform:uppercase; margin-top:3px; }
+
+    .tags-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:16px; }
+    .tag {
+      background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.2);
+      color:var(--gold); font-size:10px; font-weight:500;
+      padding:4px 10px; border-radius:20px; letter-spacing:0.5px;
+    }
+
+    .service-cta {
+      display:flex; align-items:center; gap:10px; margin-top:20px;
+      color:var(--gold); font-size:11px; font-weight:600; letter-spacing:1px;
+      cursor:pointer; transition:gap 0.2s; text-decoration:none;
+    }
+    .service-cta:hover { gap:16px; }
+    .service-cta-arrow { font-size:16px; transition:transform 0.2s; }
+    .service-cta:hover .service-cta-arrow { transform:translateX(4px); }
+
+    /* ─── SLIDE: CONTACTO ─── */
+    .slide-contacto {
+      flex-direction:column; justify-content:center; align-items:center;
+      text-align:center; padding:80px 40px 60px;
+      background:linear-gradient(135deg, var(--dark) 0%, var(--dark3) 50%, var(--dark) 100%);
+      position:relative; overflow:hidden;
+    }
+    .contacto-bg {
+      position:absolute; inset:0; pointer-events:none; z-index:-1;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 60%, rgba(201,168,76,0.06) 0%, transparent 70%);
+    }
+    .contacto-eyebrow {
+      color:var(--gold); font-size:9px; font-weight:700; letter-spacing:5px;
+      text-transform:uppercase; margin-bottom:16px; position:relative;
+    }
+    .contacto-title {
+      font-family:'Playfair Display', serif;
+      font-size:clamp(44px,6vw,68px); font-weight:800; line-height:1.0;
+      letter-spacing:-1.5px; color:var(--text); margin-bottom:10px; position:relative;
+    }
+    .contacto-title em { color:var(--gold); font-style:italic; }
+    .contacto-desc {
+      color:var(--muted); font-size:14px; font-weight:300;
+      line-height:1.6; margin-bottom:44px; max-width:480px; position:relative;
+    }
+
+    .contact-cards {
+      display:flex; gap:14px; justify-content:center; flex-wrap:wrap;
+      position:relative; margin-bottom:36px;
+    }
+    .contact-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:22px 28px; text-align:center;
+      min-width:160px; transition:all 0.2s; cursor:pointer;
+      text-decoration:none;
+    }
+    .contact-card:hover { border-color:rgba(201,168,76,0.4); transform:translateY(-3px); }
+    .contact-icon { font-size:26px; margin-bottom:10px; }
+    .contact-lbl  { color:var(--subtle); font-size:9px; font-weight:600; letter-spacing:2px; text-transform:uppercase; margin-bottom:5px; }
+    .contact-val  { color:var(--text); font-size:12px; font-weight:600; }
+
+    .contacto-actions { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; position:relative; }
+
+    .contacto-footer {
+      position:absolute; bottom:20px; left:0; right:0; text-align:center;
+      color:var(--muted); font-size:10px; letter-spacing:2px; text-transform:uppercase;
+    }
+
+    /* ─── MOBILE ─── */
+    @media (max-width: 768px) {
+      #topbar { padding:12px 16px 10px; }
+      .topbar-nav { display:none; }
+      .topbar-cta { padding:7px 14px; font-size:9px; }
+      .logo-name { font-size:10px; }
+
+      .slide-portada { padding:80px 24px 56px; }
+      .stats-row { gap:24px; }
+      .stat-num { font-size:28px; }
+      .portada-actions { flex-direction:column; align-items:flex-start; gap:8px; }
+      .portada-badge { display:none; }
+
+      .slide-service { flex-direction:column; }
+      .service-photo { width:100%; height:38vh; order:1 !important; }
+      .service-content { padding:20px 24px 56px; order:2 !important; }
+      .service-title { font-size:28px; }
+      .service-desc { display:none; }
+
+      .slide-contacto { padding:70px 20px 56px; }
+      .contact-cards { gap:10px; }
+      .contact-card { min-width:130px; padding:16px 18px; }
+      .contacto-actions { flex-direction:column; align-items:center; }
+
+      #nav-prev { left:8px; }
+      #nav-next { right:8px; }
+    }
+
+    /* ─── HELPERS ─── */
+    .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+  </style>
 </head>
 <body>
 
-<div class="catalogo">
-  <div class="book" id="book">
-    <!-- PORTADA -->
-    <section class="page portada" data-page="0" style="z-index:9;">
-      <img src="portadamg (2).png" class="bg" alt="Portada MG Service Group SAS">
-    </section>
+<!-- PROGRESS BAR -->
+<div id="progress-bar"></div>
 
-    <!-- CUBIERTAS -->
-    <section class="page" data-page="1" style="z-index:8;">
-      <div class="header">
-        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
-        <div class="links">
-          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
-          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://www.mgservicesas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
+<!-- TOP BAR -->
+<header id="topbar">
+  <div class="topbar-logo">
+    <div class="logo-mark">MG</div>
+    <div class="logo-text">
+      <div class="logo-name">MG Service Group</div>
+      <div class="logo-sub">SAS · Bogotá · Est. 2015</div>
+    </div>
+  </div>
+
+  <nav class="topbar-nav" aria-label="Secciones">
+    <button class="nav-pill active" onclick="goTo(0)">Inicio</button>
+    <button class="nav-pill" onclick="goTo(1)">Estructuras</button>
+    <button class="nav-pill" onclick="goTo(2)">Panel PUR</button>
+    <button class="nav-pill" onclick="goTo(3)">Cubiertas</button>
+    <button class="nav-pill" onclick="goTo(4)">Mantenimiento</button>
+    <button class="nav-pill" onclick="goTo(5)">Refrigeración</button>
+    <button class="nav-pill" onclick="goTo(6)">Contacto</button>
+  </nav>
+
+  <a href="https://wa.me/573143101649" target="_blank" rel="noopener" class="topbar-cta">
+    💬 Cotizar ahora
+  </a>
+</header>
+
+<!-- NAV ARROWS -->
+<button id="nav-prev" class="nav-arrow" onclick="prev()" aria-label="Anterior">‹</button>
+<button id="nav-next" class="nav-arrow" onclick="next()" aria-label="Siguiente">›</button>
+
+<!-- DOT INDICATOR -->
+<div id="dots" role="tablist" aria-label="Diapositivas"></div>
+
+<!-- ══════════════════════════════════════
+     CATALOG SLIDES
+     ══════════════════════════════════════ -->
+<main id="catalog">
+
+  <!-- ▸ 01 PORTADA ─────────────────────── -->
+  <section class="slide slide-portada active" id="slide-0" aria-label="Portada">
+    <div class="portada-bg-accent"></div>
+    <div class="portada-bg-grid"></div>
+
+    <div class="portada-top">
+      <div class="portada-eyebrow">
+        <div class="eyebrow-line"></div>
+        <span class="eyebrow-text">Catálogo de servicios 2025 · Bogotá, Colombia</span>
+      </div>
+
+      <h1 class="portada-title">
+        Construimos<br>
+        el <em>futuro</em><br>
+        contigo.
+      </h1>
+      <p class="portada-desc">
+        Más de una década diseñando, fabricando e instalando obras metálicas que levantan industria en Colombia.
+        Precisión artesanal, ingeniería verificada, puntualidad como regla.
+      </p>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-num">+11</div>
+          <div class="stat-lbl">Años</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">+250</div>
+          <div class="stat-lbl">Proyectos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">100%</div>
+          <div class="stat-lbl">Cumplimiento</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">24/7</div>
+          <div class="stat-lbl">Soporte</div>
         </div>
       </div>
-      <img src="cubiertateja8.png" class="bg" alt="Cubiertas tipo sándwich teja Techmet">
-      <div class="overlay" data-service="cubiertas">
-        <h2>Cubiertas tipo sándwich teja Techmet</h2>
-        <p>Instalación de cubiertas industriales con materiales de alta resistencia. Garantizamos durabilidad, estanqueidad y una estética moderna que protege tu inversión.</p>
-        <div class="click-hint">Haz clic para más información</div>
-      </div>
-    </section>
+    </div>
 
-    <!-- PANELES -->
-    <section class="page" data-page="2" style="z-index:7;">
-      <div class="header">
-        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
-        <div class="links">
-          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
-          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
-        </div>
+    <div class="portada-bottom">
+      <div class="portada-actions">
+        <button class="btn-primary" onclick="goTo(1)">Ver servicios →</button>
+        <a href="https://wa.me/573143101649" target="_blank" rel="noopener" class="btn-ghost">Cotizar proyecto</a>
       </div>
-      <img src="Panelesdepoliuretano.png" class="bg" alt="Paneles PU">
-      <div class="overlay" data-service="paneles">
-        <h2>Paneles de poliuretano</h2>
-        <p>Instalamos paneles en poliuretano tipo sándwich, ideales para cámaras frigoríficas y cubiertas industriales. Garantizan aislamiento térmico, reducción de costos energéticos y un acabado impecable.</p>
-        <div class="click-hint">Haz clic para más información</div>
+      <div class="portada-badge">
+        <span class="badge-brand">MG · SAS</span>
+        <span class="badge-sub">mgservicesas.com</span>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- MANTENIMIENTO -->
-    <section class="page" data-page="3" style="z-index:6;">
-      <div class="header">
-        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
-        <div class="links">
-          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
-          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
-        </div>
-      </div>
-      <img src="mantenimientoindustrial.png" class="bg" alt="Mantenimiento">
-      <div class="overlay" data-service="mantenimiento">
-        <h2>Mantenimiento industrial</h2>
-        <p>Programas preventivos y correctivos para prolongar la vida útil de cubiertas y estructuras, con enfoque en seguridad y reducción de costos.</p>
-        <div class="click-hint">Haz clic para más información</div>
-      </div>
-    </section>
 
-    <!-- ESTRUCTURAS -->
-    <section class="page" data-page="4" style="z-index:5;">
-      <div class="header">
-        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
-        <div class="links">
-          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
-          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
-        </div>
-      </div>
-      <img src="estructurametalica.png" class="bg" alt="Estructuras Metálicas">
-      <div class="overlay" data-service="estructuras">
-        <h2>Estructuras metálicas</h2>
-        <p>Fabricamos estructuras metálicas a la medida de tu proyecto: livianas, pesadas o industriales. Usamos tecnología de precisión, materiales de alta calidad y un equipo especializado para garantizar seguridad y durabilidad.</p>
-        <div class="click-hint">Haz clic para más información</div>
-      </div>
-    </section>
+  <!-- ▸ 02 ESTRUCTURAS METÁLICAS ────────── -->
+  <section class="slide slide-service" id="slide-1" aria-label="Estructuras metálicas">
+    <div class="service-content">
+      <div class="service-top">
+        <div class="service-num-label">01 / 05 · Diseño y Fabricación</div>
+        <h2 class="service-title">Estructuras<br><em>Metálicas</em></h2>
+        <p class="service-desc">
+          Desde vigas IPE hasta cerchas de gran luz: cálculo estructural, corte por plasma,
+          ensamble y pintura electrostática. Cada pieza fabricada en nuestro taller propio
+          en Bogotá con acero ASTM certificado y soldadura calificada AWS D1.1.
+        </p>
 
-    <!-- CABINAS -->
-    <section class="page" data-page="5" style="z-index:4;">
-      <div class="header">
-        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
-        <div class="links">
-          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
-          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://www.mgservicesas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
-        </div>
-      </div>
-      <img src="cuartosfrios.png" class="bg" alt="Cabinas de Refrigeración">
-      <div class="overlay" data-service="cabinas">
-        <h2>Cabinas de refrigeración</h2>
-        <p>Instalación y montaje de cabinas de refrigeración como sistemas de enfriamiento para proyectos industriales, comerciales y residenciales.</p>
-        <div class="click-hint">Haz clic para más información</div>
-      </div>
-    </section>
-
-    <!-- SLIDE FINAL -->
-    <section class="page" data-page="6" style="z-index:3;">
-      <div class="header">
-        <img src="logo-negro.png" alt="MG Service Group SAS" class="logo">
-        <div class="links">
-          <a href="tel:+573143101649"><i class="fa-solid fa-phone"></i> +57 314 3101649</a>
-          <a href="https://wa.me/573143101649" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-          <a href="https://www.facebook.com/people/MG-Service-Group-SAS/61581161302887" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-          <a href="https://www.instagram.com/mgservicegroupsas/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://www.mgservicegroupsas.com" target="_blank"><i class="fa-solid fa-globe"></i></a>
-        </div>
-      </div>
-      <div class="form-container">
-        <h2>Hablemos de su proyecto</h2>
-        <p class="helper">Déjenos sus datos y un experto de MG Service Group SAS lo contactará para asesorarlo y enviar una cotización.</p>
-        <form id="leadForm">
-          <input id="fName" type="text" placeholder="Nombre completo" required>
-          <input id="fEmail" type="email" placeholder="Correo electrónico" required>
-          <textarea id="fMsg" rows="4" placeholder="Cuéntenos brevemente su necesidad" required></textarea>
-          <div class="form-actions">
-            <button type="submit" class="primary">Enviar datos</button>
-            <button type="button" class="ghost" onclick="goToStart()">⬅ Volver a la portada</button>
+        <div class="spec-grid">
+          <div class="spec-item">
+            <div class="spec-val">ASTM A36</div>
+            <div class="spec-key">Acero estructural</div>
           </div>
-        </form>
-        <div class="quick-nav">
-          <button data-goto="0">Portada</button>
-          <button data-goto="1">Cubiertas</button>
-          <button data-goto="2">Paneles PU</button>
-          <button data-goto="3">Mantenimiento</button>
-          <button data-goto="4">Estructuras</button>
-          <button data-goto="5">Cabinas</button>
+          <div class="spec-item">
+            <div class="spec-val">AWS D1.1</div>
+            <div class="spec-key">Soldadura calificada</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">A572 Gr50</div>
+            <div class="spec-key">Alta resistencia</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">NR-29</div>
+            <div class="spec-key">Cert. trabajos en alturas</div>
+          </div>
+        </div>
+
+        <div class="tags-row">
+          <span class="tag">Vigas IPE / HEA</span>
+          <span class="tag">Cerchas de gran luz</span>
+          <span class="tag">Columnas y correas</span>
+          <span class="tag">Pintura electrostática</span>
+          <span class="tag">Montaje con grúas</span>
         </div>
       </div>
-    </section>
-  </div>
 
-  <div class="nav-buttons" id="nav">
-    <button id="prevBtn"><i class="fa-solid fa-arrow-left"></i></button>
-    <button id="nextBtn"><i class="fa-solid fa-arrow-right"></i></button>
-  </div>
-  <div class="hint">Usa ← / → o toca las flechas para navegar</div>
-</div>
+      <a href="https://wa.me/573143101649?text=Hola%2C%20necesito%20una%20cotizaci%C3%B3n%20para%20estructuras%20met%C3%A1licas" target="_blank" rel="noopener" class="service-cta">
+        Solicitar cotización
+        <span class="service-cta-arrow">→</span>
+      </a>
+    </div>
 
-<!-- MODAL -->
-<div class="modal" id="serviceModal" aria-hidden="true">
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <header>
-      <h3 id="modalTitle">Título</h3>
-      <button class="modal-close" id="modalClose" aria-label="Cerrar">✖</button>
-    </header>
-    <img class="modal-img" id="modalImg" src="" alt="">
-    <div class="modal-body" id="modalBody"></div>
-  </div>
-</div>
+    <div class="service-photo">
+      <img
+        src="https://images.pexels.com/photos/29274538/pexels-photo-29274538.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+        alt="Montaje de estructura metálica con grúas en proyecto industrial — MG Service Group SAS Bogotá"
+        loading="lazy"
+      >
+      <div class="service-photo-overlay"></div>
+      <div class="service-photo-badge">Taller propio · Bogotá D.C.</div>
+      <div class="service-photo-num">02 / 07</div>
+    </div>
+  </section>
 
+
+  <!-- ▸ 03 PANEL POLIURETANO ────────────── -->
+  <section class="slide slide-service reverse" id="slide-2" aria-label="Panel poliuretano">
+    <div class="service-photo">
+      <img
+        src="https://images.pexels.com/photos/20170984/pexels-photo-20170984.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+        alt="Edificio industrial con fachada de paneles sándwich Metecno — MG Service Group SAS"
+        loading="lazy"
+      >
+      <div class="service-photo-overlay"></div>
+      <div class="service-photo-badge">Distribuidor oficial Metecno</div>
+      <div class="service-photo-num">03 / 07</div>
+    </div>
+
+    <div class="service-content">
+      <div class="service-top">
+        <div class="service-num-label">02 / 05 · Aislamiento Térmico</div>
+        <h2 class="service-title">Panel<br><em>Poliuretano</em></h2>
+        <p class="service-desc">
+          Sándwich termoacústico con núcleo de PUR inyectado de alta densidad.
+          Distribuidor oficial Metecno — Techmet®, Monoroof® y Monowall®.
+          Ideal para naves industriales, cuartos fríos, fachadas y cubiertas aisladas.
+        </p>
+
+        <div class="spec-grid">
+          <div class="spec-item">
+            <div class="spec-val">30–100 mm</div>
+            <div class="spec-key">Espesores disponibles</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">λ 0.022</div>
+            <div class="spec-key">Conductividad térmica</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">Trap-Z</div>
+            <div class="spec-key">Perfilería metálica</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">PIR / PUR</div>
+            <div class="spec-key">Retardante de llama</div>
+          </div>
+        </div>
+
+        <div class="tags-row">
+          <span class="tag">Techmet®</span>
+          <span class="tag">Monoroof®</span>
+          <span class="tag">Monowall®</span>
+          <span class="tag">Cavas frigoríficas</span>
+          <span class="tag">Fachadas térmicas</span>
+        </div>
+      </div>
+
+      <a href="https://wa.me/573143101649?text=Hola%2C%20necesito%20informaci%C3%B3n%20sobre%20panel%20poliuretano%20Metecno" target="_blank" rel="noopener" class="service-cta">
+        Ver especificaciones Metecno
+        <span class="service-cta-arrow">→</span>
+      </a>
+    </div>
+  </section>
+
+
+  <!-- ▸ 04 CUBIERTAS METÁLICAS ──────────── -->
+  <section class="slide slide-service" id="slide-3" aria-label="Cubiertas metálicas">
+    <div class="service-content">
+      <div class="service-top">
+        <div class="service-num-label">03 / 05 · Cubiertas</div>
+        <h2 class="service-title">Cubiertas<br><em>Metálicas</em></h2>
+        <p class="service-desc">
+          Teja trapezoidal, Standing Seam, cubiertas curvas, traslúcidas y skylight.
+          Diseño de pendientes, canales y bajantes adaptados al clima colombiano.
+          Resistencia comprobada en lluvias tropicales y vientos fuertes.
+        </p>
+
+        <div class="spec-grid">
+          <div class="spec-item">
+            <div class="spec-val">Trapezoidal</div>
+            <div class="spec-key">Teja corrugada industrial</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">Standing Seam</div>
+            <div class="spec-key">Cubierta continua</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">Skylight</div>
+            <div class="spec-key">Traslúcido / lucernario</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">Galvalume</div>
+            <div class="spec-key">Acero galvanizado + Al</div>
+          </div>
+        </div>
+
+        <div class="tags-row">
+          <span class="tag">Galvalume AZ-150</span>
+          <span class="tag">Canales y bajantes</span>
+          <span class="tag">Impermeabilización</span>
+          <span class="tag">Cumbrera y remates</span>
+          <span class="tag">Curvada</span>
+        </div>
+      </div>
+
+      <a href="https://wa.me/573143101649?text=Hola%2C%20necesito%20cotizaci%C3%B3n%20para%20cubierta%20met%C3%A1lica" target="_blank" rel="noopener" class="service-cta">
+        Cotizar cubierta
+        <span class="service-cta-arrow">→</span>
+      </a>
+    </div>
+
+    <div class="service-photo">
+      <img
+        src="https://images.pexels.com/photos/18289258/pexels-photo-18289258.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+        alt="Edificio industrial con cubierta metálica corrugada — MG Service Group SAS Bogotá Colombia"
+        loading="lazy"
+      >
+      <div class="service-photo-overlay"></div>
+      <div class="service-photo-badge">Resistente al clima colombiano</div>
+      <div class="service-photo-num">04 / 07</div>
+    </div>
+  </section>
+
+
+  <!-- ▸ 05 MANTENIMIENTO INDUSTRIAL ───────── -->
+  <section class="slide slide-service reverse" id="slide-4" aria-label="Mantenimiento industrial">
+    <div class="service-photo">
+      <img
+        src="https://images.pexels.com/photos/2760241/pexels-photo-2760241.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+        alt="Ingeniero con casco inspeccionando maquinaria industrial — Mantenimiento 24/7 MG Service Group"
+        loading="lazy"
+      >
+      <div class="service-photo-overlay"></div>
+      <div class="service-photo-badge">Respuesta en menos de 24 horas</div>
+      <div class="service-photo-num">05 / 07</div>
+    </div>
+
+    <div class="service-content">
+      <div class="service-top">
+        <div class="service-num-label">04 / 05 · Mantenimiento</div>
+        <h2 class="service-title">Mantenimiento<br><em>Industrial 24/7</em></h2>
+        <p class="service-desc">
+          Programas preventivos y correctivos para plantas, bodegas y cubiertas.
+          Reemplazo de tejas, refuerzo estructural, impermeabilización y pintura
+          anticorrosiva. Respuesta de emergencia en menos de 24 horas.
+        </p>
+
+        <div class="spec-grid">
+          <div class="spec-item">
+            <div class="spec-val">24 / 7</div>
+            <div class="spec-key">Disponibilidad total</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">&lt; 24 h</div>
+            <div class="spec-key">Respuesta de emergencia</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">PPM</div>
+            <div class="spec-key">Plan preventivo mensual</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">100%</div>
+            <div class="spec-key">Cumplimiento entrega</div>
+          </div>
+        </div>
+
+        <div class="tags-row">
+          <span class="tag">Preventivo</span>
+          <span class="tag">Correctivo</span>
+          <span class="tag">Predictivo</span>
+          <span class="tag">Pintura anticorrosiva</span>
+          <span class="tag">Refuerzo estructural</span>
+          <span class="tag">Impermeabilización</span>
+        </div>
+      </div>
+
+      <a href="https://wa.me/573143101649?text=Hola%2C%20necesito%20un%20plan%20de%20mantenimiento%20industrial" target="_blank" rel="noopener" class="service-cta">
+        Solicitar plan de mantenimiento
+        <span class="service-cta-arrow">→</span>
+      </a>
+    </div>
+  </section>
+
+
+  <!-- ▸ 06 CABINAS DE REFRIGERACIÓN ────────── -->
+  <section class="slide slide-service" id="slide-5" aria-label="Cabinas de refrigeración">
+    <div class="service-content">
+      <div class="service-top">
+        <div class="service-num-label">05 / 05 · Refrigeración</div>
+        <h2 class="service-title">Cabinas de<br><em>Refrigeración</em></h2>
+        <p class="service-desc">
+          Cuartos fríos y cámaras de refrigeración en panel sándwich de poliuretano Metecno.
+          Instalación completa para cadena de frío — desde bodegas de distribución hasta
+          puntos de venta. Cumplimiento HACCP y normas sanitarias colombianas.
+        </p>
+
+        <div class="spec-grid">
+          <div class="spec-item">
+            <div class="spec-val">−30 °C</div>
+            <div class="spec-key">Temperatura mínima</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">80 mm</div>
+            <div class="spec-key">Panel estándar PUR</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">HACCP</div>
+            <div class="spec-key">Norma inocuidad</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">Modular</div>
+            <div class="spec-key">Diseño flexible</div>
+          </div>
+        </div>
+
+        <div class="tags-row">
+          <span class="tag">Cuartos fríos</span>
+          <span class="tag">Cámaras frigoríficas</span>
+          <span class="tag">Cadena de frío</span>
+          <span class="tag">HACCP</span>
+          <span class="tag">Panel Metecno</span>
+          <span class="tag">Puertas frigoríficas</span>
+        </div>
+      </div>
+
+      <a href="https://wa.me/573143101649?text=Hola%2C%20necesito%20cotizaci%C3%B3n%20para%20c%C3%A1mara%20de%20refrigeraci%C3%B3n" target="_blank" rel="noopener" class="service-cta">
+        Cotizar cámara de refrigeración
+        <span class="service-cta-arrow">→</span>
+      </a>
+    </div>
+
+    <div class="service-photo">
+      <img
+        src="https://images.pexels.com/photos/5953713/pexels-photo-5953713.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+        alt="Trabajador en bodega frigorífica industrial — Cabinas y cuartos fríos MG Service Group"
+        loading="lazy"
+      >
+      <div class="service-photo-overlay"></div>
+      <div class="service-photo-badge">Panel poliuretano Metecno</div>
+      <div class="service-photo-num">06 / 07</div>
+    </div>
+  </section>
+
+
+  <!-- ▸ 07 CONTACTO ──────────────────────── -->
+  <section class="slide slide-contacto" id="slide-6" aria-label="Contacto">
+    <div class="contacto-bg"></div>
+
+    <p class="contacto-eyebrow">07 / 07 · Empecemos</p>
+    <h2 class="contacto-title">Empecemos<br>la <em>obra.</em></h2>
+    <p class="contacto-desc">
+      Cuéntanos qué necesitas construir. Te respondemos en menos de 24 horas hábiles
+      con una visita técnica sin costo y una propuesta detallada.
+    </p>
+
+    <div class="contact-cards">
+      <a href="https://wa.me/573143101649" target="_blank" rel="noopener" class="contact-card">
+        <div class="contact-icon">💬</div>
+        <div class="contact-lbl">WhatsApp</div>
+        <div class="contact-val">+57 314 310 1649</div>
+      </a>
+      <a href="tel:+573102264229" class="contact-card">
+        <div class="contact-icon">📞</div>
+        <div class="contact-lbl">Teléfono</div>
+        <div class="contact-val">+57 310 226 4229</div>
+      </a>
+      <a href="mailto:mgservicegroupsas@gmail.com" class="contact-card">
+        <div class="contact-icon">📧</div>
+        <div class="contact-lbl">Correo</div>
+        <div class="contact-val">mgservicegroupsas@gmail.com</div>
+      </a>
+      <a href="https://www.mgservicesas.com" target="_blank" rel="noopener" class="contact-card">
+        <div class="contact-icon">🌐</div>
+        <div class="contact-lbl">Sitio web</div>
+        <div class="contact-val">mgservicesas.com</div>
+      </a>
+    </div>
+
+    <div class="contacto-actions">
+      <a href="https://wa.me/573143101649?text=Hola%2C%20vi%20el%20cat%C3%A1logo%20de%20MG%20Service%20Group%20y%20quiero%20una%20cotizaci%C3%B3n" target="_blank" rel="noopener" class="btn-primary">
+        💬 Escribir por WhatsApp
+      </a>
+      <a href="https://cotizador-mg-service-group.web.app" target="_blank" rel="noopener" class="btn-ghost">
+        🧮 Cotizador en línea
+      </a>
+      <a href="https://www.mgservicesas.com" target="_blank" rel="noopener" class="btn-ghost">
+        🌐 Ver sitio web
+      </a>
+    </div>
+
+    <div class="contacto-footer">
+      © 2015–2026 MG Service Group SAS · Bogotá D.C., Colombia
+    </div>
+  </section>
+
+</main><!-- /catalog -->
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════ -->
 <script>
-const pages=[...document.querySelectorAll('.page')];
-const nextBtn=document.getElementById('nextBtn');
-const prevBtn=document.getElementById('prevBtn');
-let current=0;
+(function () {
+  'use strict';
 
-function update(){
-  pages.forEach((pg,i)=>{
-    if(i<current){ pg.classList.add('slide-out'); }
-    else{ pg.classList.remove('slide-out'); }
-    pg.style.zIndex=(pages.length - i);
+  const TOTAL  = 7;
+  let   current = 0;
+  let   isAnimating = false;
+
+  // Build dots
+  const dotsEl = document.getElementById('dots');
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Diapositiva ' + (i + 1));
+    d.setAttribute('role', 'tab');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  }
+
+  function getSlide(n) {
+    return document.getElementById('slide-' + n);
+  }
+
+  function updateUI(n) {
+    // Progress bar
+    document.getElementById('progress-bar').style.width = ((n + 1) / TOTAL * 100) + '%';
+
+    // Dots
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === n);
+    });
+
+    // Nav pills
+    document.querySelectorAll('.nav-pill').forEach((p, i) => {
+      p.classList.toggle('active', i === n);
+    });
+  }
+
+  window.goTo = function (n) {
+    if (isAnimating || n === current || n < 0 || n >= TOTAL) return;
+    isAnimating = true;
+
+    const from = getSlide(current);
+    const to   = getSlide(n);
+    const dir  = n > current ? 1 : -1;
+
+    // Prepare destination
+    to.style.transform = 'translateX(' + (dir * 40) + 'px)';
+    to.style.opacity   = '0';
+    to.classList.add('active');
+
+    // Force reflow so browser registers initial position before transition starts
+    to.offsetHeight; // eslint-disable-line no-unused-expressions
+
+    const EASE = 'opacity 0.55s cubic-bezier(.4,0,.2,1), transform 0.55s cubic-bezier(.4,0,.2,1)';
+
+    // Set transition BEFORE changing state so browser animates the change
+    to.style.transition   = EASE;
+    from.style.transition = EASE;
+
+    // Animate in
+    to.style.transform = 'translateX(0)';
+    to.style.opacity   = '1';
+
+    // Animate out
+    from.style.transform = 'translateX(' + (-dir * 40) + 'px)';
+    from.style.opacity   = '0';
+
+    setTimeout(() => {
+      from.classList.remove('active');
+      from.style.transition = from.style.transform = from.style.opacity = '';
+      to.style.transition   = to.style.transform   = to.style.opacity   = '';
+      current    = n;
+      isAnimating = false;
+      updateUI(n);
+    }, 560);
+
+    updateUI(n); // update early so nav feels snappy
+  };
+
+  window.next = function () { goTo(current + 1); };
+  window.prev = function () { goTo(current - 1); };
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' ) next();
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'   ) prev();
+    if (e.key === 'Home') goTo(0);
+    if (e.key === 'End')  goTo(TOTAL - 1);
   });
-  prevBtn && (prevBtn.style.visibility=current>0?'visible':'hidden');
-  nextBtn && (nextBtn.style.visibility=current<pages.length-1?'visible':'hidden');
-}
-function goToStart(){ current=0; update(); }
 
-nextBtn && nextBtn.addEventListener('click',()=>{ if(current<pages.length-1){ current++; update(); }});
-prevBtn && prevBtn.addEventListener('click',()=>{ if(current>0){ current--; update(); }});
-pages.forEach((pg,i)=>pg.querySelectorAll('.logo').forEach(logo=>logo.addEventListener('click',goToStart)));
-pages.forEach((pg,i)=>pg.addEventListener('click',()=>{ if(i===current && current<pages.length-1){ current++; update(); }}));
-window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') nextBtn?.click(); if(e.key==='ArrowLeft')  prevBtn?.click();});
-let sx=0,sy=0;
-window.addEventListener('touchstart',(e)=>{ sx=e.touches[0].clientX; sy=e.touches[0].clientY; },{passive:true});
-window.addEventListener('touchend',(e)=>{
-  const dx=(e.changedTouches[0].clientX - sx), dy=(e.changedTouches[0].clientY - sy);
-  if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40){ if(dx<0) nextBtn?.click(); else prevBtn?.click(); }
-},{passive:true});
+  // Touch / swipe
+  let touchStartX = 0, touchStartY = 0;
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 48) {
+      dx < 0 ? next() : prev();
+    }
+  }, { passive: true });
 
-document.querySelectorAll('.quick-nav button').forEach(b=>{
-  b.addEventListener('click', (e)=> {
-    e.stopPropagation();
-    const idx = parseInt(b.dataset.goto,10);
-    current = Math.max(0, Math.min(idx, pages.length-1));
-    update();
-  });
-});
-
-/* FormSubmit */
-document.getElementById('leadForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  const name = document.getElementById('fName').value.trim();
-  const email = document.getElementById('fEmail').value.trim();
-  const msg = document.getElementById('fMsg').value.trim();
-
-  fetch('https://formsubmit.co/ajax/mgservicegroupsas@gmail.com', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ Nombre: name, Correo: email, Mensaje: msg, Origen: 'Catálogo Interactivo (web)' })
-  })
-  .then(r => { if(!r.ok) throw new Error('Error de red'); return r.json(); })
-  .then(() => { alert('✅ Gracias por registrarse, pronto será contactado.'); this.reset(); })
-  .catch(() => { alert('❌ No se pudo enviar. Intente nuevamente en unos minutos.'); });
-});
-
-/* MODALES */
-const modal=document.getElementById('serviceModal');
-const modalImg=document.getElementById('modalImg');
-const modalBody=document.getElementById('modalBody');
-const modalTitle=document.getElementById('modalTitle');
-const modalClose=document.getElementById('modalClose');
-
-const modalData={
-  cubiertas:{title:'Cubiertas tipo sándwich teja Techmet',img:'cubiertateja4.jpeg',text:'Instalamos cubiertas tipo sándwich con teja Techmet, óptimas para naves y centros logísticos. Su núcleo aislante y perfil exterior aseguran estanqueidad, excelente desempeño térmico y un acabado moderno. Gestionamos logística, seguridad en altura y garantías del sistema.'},
-  paneles:{title:'Paneles de poliuretano',img:'paneles.png',text:'Paneles en poliuretano para cámaras frías, techos y fachadas. Alta eficiencia energética (baja transmitancia), montaje ágil y precisión en encuentros. Cumplimiento de normativas sanitarias y compatibilidad con puertas y accesorios frigoríficos.'},
-  mantenimiento:{title:'Mantenimiento industrial',img:'mantenimientos.png',text:'Programas preventivos y correctivos: inspección, limpieza, sellado de juntas, reposición de fijaciones y tratamiento anticorrosivo. Reducimos paradas, mitigamos riesgos y extendemos la vida útil de cubiertas y estructuras.'},
-  estructuras:{title:'Estructuras metálicas',img:'estructuras.png',text:'Diseño, fabricación y montaje de estructuras livianas y pesadas para bodegas y galpones. Cálculo estructural, soldadura certificada, control dimensional y montaje seguro. Entregas con planos As-Built y dosieres de calidad.'},
-  cabinas:{title:'Cabinas de refrigeración',img:'cabinas.png',text:'Suministro e instalación de cabinas de refrigeración con control estable de temperatura. Soluciones para industria alimentaria, farmacéutica y logística. Enfoque en ahorro energético, estanqueidad, iluminación y accesos seguros, requisitos de seguridad, ambientales y de operación.'}
-};
-
-document.querySelectorAll('.overlay[data-service]').forEach(ov=>{
-  ov.addEventListener('click',(e)=>{
-    e.stopPropagation();
-    const key=ov.dataset.service;
-    if(!modalData[key])return;
-    const d=modalData[key];
-    modalTitle.textContent=d.title;
-    modalImg.src=d.img;
-    modalImg.alt=d.title;
-    modalBody.textContent=d.text;
-    modal.classList.add('active');
-  });
-});
-
-function closeModal(){ modal.classList.remove('active'); }
-modalClose.addEventListener('click',closeModal);
-modal.addEventListener('click',(e)=>{ if(e.target===modal) closeModal(); });
-window.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeModal(); });
-
-update();
+  // Initial UI
+  updateUI(0);
+})();
 </script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
