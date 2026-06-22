@@ -180,21 +180,29 @@
       padding:100px 80px 60px;
       position:relative; overflow:hidden;
     }
-    .portada-bg-accent {
-      position:absolute; top:0; right:0; width:42%; height:100%;
-      background:linear-gradient(135deg, rgba(201,168,76,0.04) 0%, rgba(201,168,76,0.01) 100%);
-      border-left:1px solid rgba(201,168,76,0.08);
-      pointer-events:none;
+    .portada-video {
+      position:absolute; inset:0; width:100%; height:100%;
+      object-fit:cover; object-position:center;
+      opacity:0.38; z-index:0; pointer-events:none;
+    }
+    .portada-video-overlay {
+      position:absolute; inset:0; z-index:1; pointer-events:none;
+      background:linear-gradient(
+        135deg,
+        rgba(13,13,13,0.72) 0%,
+        rgba(13,13,13,0.45) 60%,
+        rgba(13,13,13,0.65) 100%
+      );
     }
     .portada-bg-grid {
-      position:absolute; inset:0; opacity:0.015;
+      position:absolute; inset:0; opacity:0.012; z-index:2;
       background-image:
         linear-gradient(rgba(201,168,76,1) 1px, transparent 1px),
         linear-gradient(90deg, rgba(201,168,76,1) 1px, transparent 1px);
       background-size:60px 60px;
       pointer-events:none;
     }
-    .portada-top { position:relative; }
+    .portada-top { position:relative; z-index:3; }
     .portada-eyebrow {
       display:flex; align-items:center; gap:12px; margin-bottom:32px;
     }
@@ -219,7 +227,7 @@
     .stat-num { font-size:38px; font-weight:800; color:var(--gold); letter-spacing:-1px; line-height:1; }
     .stat-lbl { font-size:9px; font-weight:600; color:var(--subtle); letter-spacing:3px; text-transform:uppercase; margin-top:4px; }
 
-    .portada-bottom { display:flex; justify-content:space-between; align-items:flex-end; position:relative; }
+    .portada-bottom { display:flex; justify-content:space-between; align-items:flex-end; position:relative; z-index:3; }
     .portada-actions { display:flex; gap:12px; align-items:center; }
     .btn-primary {
       background:var(--gold); color:#000; font-size:11px; font-weight:700;
@@ -486,7 +494,11 @@
 
   <!-- ▸ 01 PORTADA ─────────────────────── -->
   <section class="slide slide-portada active" id="slide-0" aria-label="Portada">
-    <div class="portada-bg-accent"></div>
+    <video class="portada-video" autoplay muted loop playsinline preload="auto">
+      <source src="https://videos.pexels.com/video-files/6046358/6046358-hd_1920_1080_24fps.mp4" type="video/mp4">
+      <source src="https://videos.pexels.com/video-files/11887094/11887094-hd_1920_1080_25fps.mp4" type="video/mp4">
+    </video>
+    <div class="portada-video-overlay"></div>
     <div class="portada-bg-grid"></div>
 
     <div class="portada-top">
@@ -873,10 +885,7 @@
       <a href="https://wa.me/573143101649?text=Hola%2C%20vi%20el%20cat%C3%A1logo%20de%20MG%20Service%20Group%20y%20quiero%20una%20cotizaci%C3%B3n" target="_blank" rel="noopener" class="btn-primary">
         💬 Escribir por WhatsApp
       </a>
-      <a href="https://cotizador-mg-service-group.web.app" target="_blank" rel="noopener" class="btn-ghost">
-        🧮 Cotizador en línea
-      </a>
-      <a href="https://www.mgservicesas.com" target="_blank" rel="noopener" class="btn-ghost">
+<a href="https://www.mgservicesas.com" target="_blank" rel="noopener" class="btn-ghost">
         🌐 Ver sitio web
       </a>
     </div>
